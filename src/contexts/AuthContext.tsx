@@ -62,7 +62,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const initialize = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession()
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+                // If there's an error getting session, clear it and start fresh
+                if (sessionError) {
+                    console.warn('[AUTH] Session error detected, clearing:', sessionError.message)
+                    await supabase.auth.signOut({ scope: 'local' })
+                    if (mounted) {
+                        setUser(null)
+                        setProfile(null)
+                        setLoading(false)
+                        clearTimeout(safetyTimeout)
+                    }
+                    return
+                }
+
                 if (!mounted) return
 
                 const currentUser = session?.user ?? null
@@ -70,10 +84,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (currentUser) {
                     const data = await fetchProfileData(currentUser.id)
-                    if (mounted) setProfile(data)
+
+                    // If profile fetch fails, session might be invalid - clear it
+                    if (!data && mounted) {
+                        console.warn('[AUTH] Profile not found for user, clearing session')
+                        await supabase.auth.signOut({ scope: 'local' })
+                        setUser(null)
+                        setProfile(null)
+                    } else if (mounted) {
+                        setProfile(data)
+                    }
                 }
             } catch (err: any) {
-                console.error('Auth initialization error:', err)
+                console.error('[AUTH] Auth initialization error:', err)
+                // On any error, clear potentially corrupted session
+                try {
+                    await supabase.auth.signOut({ scope: 'local' })
+                } catch (e) {
+                    console.error('[AUTH] Error clearing session:', e)
+                }
+                if (mounted) {
+                    setUser(null)
+                    setProfile(null)
+                }
             } finally {
                 if (mounted) {
                     setLoading(false)
