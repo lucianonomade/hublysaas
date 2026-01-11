@@ -10,9 +10,20 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Accept build arguments for Vite environment variables
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_SERPER_API_KEY
+ARG VITE_GROQ_API_KEY
+
+# Set as environment variables for the build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV VITE_SERPER_API_KEY=$VITE_SERPER_API_KEY
+ENV VITE_GROQ_API_KEY=$VITE_GROQ_API_KEY
+
 # Build the application
 # Note: VITE_ variables are baked in at build time.
-# Ensure CI/CD or build process provides these args or env vars.
 RUN npm run build
 
 # Production Stage
