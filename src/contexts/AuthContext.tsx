@@ -102,7 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signIn = async (email: string, password: string) => {
         console.log('[AUTH] Starting signIn...')
+        setLoading(true)
+
         try {
+            // Clear any existing session first to prevent conflicts
+            await supabase.auth.signOut({ scope: 'local' })
+
             // Add timeout to prevent infinite waiting
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Login timeout - verifique sua conexão')), 10000)
@@ -116,16 +121,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (error) {
                 console.error('[AUTH] SignIn error:', error)
+                setLoading(false)
                 throw error
             }
 
             if (!data?.user) {
+                setLoading(false)
                 throw new Error('Usuário ou senha incorretos')
             }
 
             console.log('[AUTH] SignIn completed successfully')
+            // Loading will be set to false by onAuthStateChange
         } catch (e: any) {
             console.error('[AUTH] Exception in signIn:', e)
+            setLoading(false)
             throw new Error(e.message || 'Erro ao fazer login')
         }
     }
