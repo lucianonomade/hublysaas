@@ -175,7 +175,6 @@ export default function CRM() {
                     onClose={() => setSelectedLead(null)}
                     onAddInteraction={() => setShowInteractionModal(true)}
                     onAddReminder={() => setShowReminderModal(true)}
-                    onRefresh={loadLeads}
                 />
             )}
 

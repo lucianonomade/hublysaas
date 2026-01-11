@@ -150,8 +150,7 @@ export default function ProposalGenerator() {
             const shareUrl = `${window.location.origin}/proposal/${data.share_token}`
             const whatsappText = `Olá ${formData.client_name}! 🎯\n\nFiz uma proposta personalizada para o site de vocês.\n\nConfira: ${shareUrl}`
 
-            navigator.clipboard.writeText(shareUrl)
-            setCopied(true)
+
 
             toast.success('Link copiado! 📋', {
                 description: (
