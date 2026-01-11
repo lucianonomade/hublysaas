@@ -58,7 +58,7 @@ export default function AdminDashboard() {
         setCreating(true)
 
         try {
-            const { data, error } = await supabase.rpc('create_new_user', {
+            const { error } = await supabase.rpc('create_new_user', {
                 new_email: newUserEmail,
                 new_password: newUserPassword,
                 new_role: newUserRole

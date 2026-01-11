@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -68,8 +68,8 @@ export default function PRDGenerator() {
                                 <Card
                                     key={plat.id}
                                     className={`cursor-pointer transition-all ${platform === plat.id
-                                            ? 'border-primary bg-primary/10'
-                                            : 'border-white/10 hover:border-white/20'
+                                        ? 'border-primary bg-primary/10'
+                                        : 'border-white/10 hover:border-white/20'
                                         }`}
                                     onClick={() => setPlatform(plat.id)}
                                 >

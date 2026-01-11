@@ -13,10 +13,10 @@ interface LeadDetailSidebarProps {
     onClose: () => void
     onAddInteraction: () => void
     onAddReminder: () => void
-    onRefresh: () => void
+
 }
 
-export default function LeadDetailSidebar({ lead, onClose, onAddInteraction, onAddReminder, onRefresh }: LeadDetailSidebarProps) {
+export default function LeadDetailSidebar({ lead, onClose, onAddInteraction, onAddReminder }: LeadDetailSidebarProps) {
     const [interactions, setInteractions] = useState<Interaction[]>([])
     const [reminders, setReminders] = useState<Reminder[]>([])
     const [loading, setLoading] = useState(true)

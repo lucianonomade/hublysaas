@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Receipt, Plus, Trash2, Copy, Send, Check } from 'lucide-react'
+import { Receipt, Plus, Trash2, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { ProposalItem } from '@/lib/types'
@@ -58,7 +58,6 @@ export default function ProposalGenerator() {
     const [items, setItems] = useState<ProposalItem[]>([])
     const [discount, setDiscount] = useState(0)
     const [loading, setLoading] = useState(false)
-    const [copied, setCopied] = useState(false)
 
     useEffect(() => {
         if (leadId) {
