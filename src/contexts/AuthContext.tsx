@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signIn = async (email: string, password: string) => {
         console.log('[AUTH] Starting signIn...')
-        setLoading(true)
+
 
         try {
             // Clear any existing session first to prevent conflicts
