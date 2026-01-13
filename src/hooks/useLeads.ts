@@ -10,7 +10,10 @@ export function useLeads(campaignId?: string) {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        if (!user) return
+        if (!user) {
+            setLoading(false)
+            return
+        }
 
         const fetchLeads = async () => {
             try {
