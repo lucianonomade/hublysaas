@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hubly - Test</title>
+</head>
+
+<body>
+    <h1>Hubly Test Page</h1>
+    <p>If you can see this, Nginx is working!</p>
+    <script>
+        console.log('Test page loaded successfully');
+        console.log('Environment check:', {
+            hasSupabaseUrl: typeof import.meta !== 'undefined',
+            location: window.location.href
+        });
+    </script>
+</body>
+
+</html>
