@@ -10,20 +10,13 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Accept build arguments for Vite environment variables
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ARG VITE_SERPER_API_KEY
-ARG VITE_GROQ_API_KEY
-
-# Set as environment variables for the build
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
-ENV VITE_SERPER_API_KEY=$VITE_SERPER_API_KEY
-ENV VITE_GROQ_API_KEY=$VITE_GROQ_API_KEY
+# Build with placeholder values - will be replaced at runtime
+ENV VITE_SUPABASE_URL=__VITE_SUPABASE_URL__
+ENV VITE_SUPABASE_ANON_KEY=__VITE_SUPABASE_ANON_KEY__
+ENV VITE_SERPER_API_KEY=__VITE_SERPER_API_KEY__
+ENV VITE_GROQ_API_KEY=__VITE_GROQ_API_KEY__
 
 # Build the application
-# Note: VITE_ variables are baked in at build time.
 RUN npm run build
 
 # Production Stage
@@ -35,8 +28,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use custom entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
