@@ -1,0 +1,2 @@
+NGINX IS WORKING!
+This file proves that nginx can serve static files from /usr/share/nginx/html
