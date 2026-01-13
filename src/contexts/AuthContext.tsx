@@ -147,7 +147,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signIn = async (email: string, password: string) => {
         console.log('[AUTH] Starting signIn for:', email)
-        console.log('[AUTH] Supabase URL:', supabase.supabaseUrl)
 
         try {
             console.log('[AUTH] Calling signInWithPassword...')
