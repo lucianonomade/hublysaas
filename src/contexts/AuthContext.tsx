@@ -1,8 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
-import { Profile } from '@/lib/types'
-import { isAbortError } from '@/lib/errorUtils'
+
+interface Profile {
+    id: string
+    email: string
+    role: 'admin' | 'user'
+    is_active: boolean
+}
 
 interface AuthContextType {
     user: User | null
@@ -12,7 +17,6 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<void>
     signInWithMagicLink: (email: string) => Promise<void>
     signOut: () => Promise<void>
-    refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -22,30 +26,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [profile, setProfile] = useState<Profile | null>(null)
     const [loading, setLoading] = useState(true)
 
-    const fetchProfileData = async (userId: string) => {
+    const fetchProfileData = async (userId: string): Promise<Profile | null> => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .maybeSingle()
+                .single()
 
             if (error) {
-                if (!isAbortError(error)) {
-                    console.error('Error fetching profile:', error)
-                }
+                console.error('[AUTH] Error fetching profile:', error)
                 return null
             }
-            return data as Profile
-        } catch (e) {
-            return null
-        }
-    }
 
-    const refreshProfile = async () => {
-        if (user) {
-            const data = await fetchProfileData(user.id)
-            setProfile(data)
+            return data as Profile
+        } catch (err) {
+            console.error('[AUTH] Exception fetching profile:', err)
+            return null
         }
     }
 
@@ -149,75 +146,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const signIn = async (email: string, password: string) => {
-        console.log('[AUTH] Starting signIn...')
-
+        console.log('[AUTH] Starting signIn for:', email)
+        console.log('[AUTH] Supabase URL:', supabase.supabaseUrl)
 
         try {
-            // Clear any existing session first to prevent conflicts
-            await supabase.auth.signOut({ scope: 'local' })
+            console.log('[AUTH] Calling signInWithPassword...')
 
-            // Add timeout to prevent infinite waiting
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Login timeout - verifique sua conexão')), 10000)
-            )
+            const { error, data } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            })
 
-            const loginPromise = supabase.auth.signInWithPassword({ email, password })
-
-            const { error, data } = await Promise.race([loginPromise, timeoutPromise]) as any
-
-            console.log('[AUTH] SignIn response:', error ? 'ERROR' : 'SUCCESS', data)
+            console.log('[AUTH] Response received:', { error, hasUser: !!data?.user })
 
             if (error) {
-                console.error('[AUTH] SignIn error:', error)
-                setLoading(false)
-                throw error
+                console.error('[AUTH] Login error:', error)
+                throw new Error(error.message)
             }
 
             if (!data?.user) {
-                setLoading(false)
-                throw new Error('Usuário ou senha incorretos')
+                throw new Error('Credenciais inválidas')
             }
 
-            console.log('[AUTH] SignIn completed successfully')
-            // Loading will be set to false by onAuthStateChange
+            console.log('[AUTH] Login successful!')
         } catch (e: any) {
-            console.error('[AUTH] Exception in signIn:', e)
-            setLoading(false)
-            throw new Error(e.message || 'Erro ao fazer login')
+            console.error('[AUTH] SignIn exception:', e)
+            throw e
         }
     }
 
     const signInWithMagicLink = async (email: string) => {
         const { error } = await supabase.auth.signInWithOtp({
             email,
-            options: { emailRedirectTo: window.location.origin + '/dashboard' }
+            options: {
+                emailRedirectTo: window.location.origin,
+            },
         })
         if (error) throw error
     }
 
     const signOut = async () => {
-        try {
-            await supabase.auth.signOut()
-            setUser(null)
-            setProfile(null)
-        } catch (error) {
-            console.error('Sign out error:', error)
-        }
-    }
-
-    const value = {
-        user,
-        profile,
-        loading,
-        signUp,
-        signIn,
-        signInWithMagicLink,
-        signOut,
-        refreshProfile
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+        setUser(null)
+        setProfile(null)
     }
 
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signInWithMagicLink, signOut }}>
             {children}
         </AuthContext.Provider>
     )
